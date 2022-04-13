@@ -10,5 +10,11 @@ class Booking(models.Model):
     user        = models.ForeignKey('users.User', on_delete=models.CASCADE)
     stay        = models.ForeignKey('staies.Stay', on_delete=models.CASCADE)
     
+    class Meta:
+        db_table = 'bookings'
+    
 class Status(models.Model):
     name = models.CharField(max_length=200)
+    
+    class Meta:
+        db_table = 'statuses'
