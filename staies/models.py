@@ -1,3 +1,4 @@
+from ctypes import addressof
 from django.db      import models
 
 class Stay(models.Model):
@@ -12,6 +13,7 @@ class Stay(models.Model):
     guest_pet   = models.IntegerField(default=0)
     stay_type   = models.ForeignKey('StayType' , on_delete=models.CASCADE )
     description = models.CharField(max_length=400)
+    address     = models.CharField(max_length=400)
     latitude    = models.DecimalField(max_digits=11, decimal_places=7)
     longitude   = models.DecimalField(max_digits=11, decimal_places=7)
     created_at  = models.DateTimeField(auto_now_add = True)
