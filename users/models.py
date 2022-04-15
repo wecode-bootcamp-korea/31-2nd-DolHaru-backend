@@ -1,7 +1,7 @@
 from django.db import models
 
 class User(models.Model):
-    kakao_id   = models.IntegerField()
+    kakao_id   = models.CharField(max_length=20)
     is_host    = models.BooleanField(default=False)
     is_adult   = models.BooleanField(default=False)
     email      = models.CharField(max_length=300)
