@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-from my_settings import DATABASES, SECRET_KEY
+from my_settings import DATABASES, SECRET_KEY ,ALGORITHM
 
 from pathlib import Path
 import pymysql
@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = SECRET_KEY
-
+ALGORITHM  = ALGORITHM
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

@@ -155,8 +155,8 @@ class StayDetailPageTest(TestCase):
         "maxPet": 2,
         "stayType": "호텔",
         "address": "제주도 어딘가",
-        "latitude": "11.0000001",
-        "longitude": "11.0000001",
+        "latitude": "11.0000011111321",
+        "longitude": "11.0000011111321",
         "services": [
             "조식",
             "일식",
