@@ -13,7 +13,6 @@ from my_settings import DATABASES, SECRET_KEY ,ALGORITHM
 
 from pathlib import Path
 import pymysql
-
 pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -45,6 +44,7 @@ INSTALLED_APPS = [
     'bookings',
     'staies',
     'users',
+    'cores',
 ]
 
 MIDDLEWARE = [
