@@ -1,8 +1,12 @@
+import json ,uuid , boto3
+
 from django.http    import JsonResponse
 from django.views   import View
 
+from django.conf    import settings
 from staies.models  import *
 from users.models   import *
+from cores.utils    import author
 
 class StayDetailView(View):
     def get(self, request, stay_id):
