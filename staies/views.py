@@ -1,8 +1,13 @@
+import json ,uuid , boto3
+
 from django.http    import JsonResponse
 from django.views   import View
+from django.db      import transaction
 
+from django.conf    import settings
 from staies.models  import *
 from users.models   import *
+from cores.utils    import author
 
 class StayDetailView(View):
     def get(self, request, stay_id):
@@ -37,3 +42,70 @@ class StayDetailView(View):
             return JsonResponse({'result' : result} , status = 200)
         except Stay.DoesNotExist:
             return JsonResponse({'message' : 'STAY_DOES_NOT_EXIST'} , status = 404)
+
+class HostingView(View):
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id = settings.AWS_ACCESS_KEY_ID , 
+        aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    )
+    @author
+    def post(self, request):
+        try:
+            user = request.user
+            user.is_host=True
+            
+            images = request.FILES.getlist('image')
+
+            new_stay = Stay.objects.create(
+                user_id         = user.id,
+                title           = request.POST['title'],
+                price           = request.POST['price'],
+                bed             = request.POST['bed'],
+                bedroom         = request.POST['bedRoom'],
+                bathroom        = request.POST['bathRoom'],
+                guest_adult     = request.POST['maxAdult'],
+                guest_kid       = request.POST['maxKid'],
+                guest_pet       = request.POST['maxPet'],
+                stay_type_id    = request.POST['stayTypeID'],
+                description     = request.POST['description'],
+                address         = request.POST['address'],
+                latitude        = request.POST['latitude'],
+                longitude       = request.POST['longitude']
+            )
+
+            if len(images) < 2:
+                return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+
+            for image in images:
+                dolharu_uuid = str(uuid.uuid4())
+                self.s3_client.upload_fileobj(
+                    image,
+                    "dolharu", 
+                    f'dolharu_images/{dolharu_uuid}',        
+                )
+                image_url = "https://dolharu.s3.ap-northeast-2.amazonaws.com/dolharu_images/" + dolharu_uuid
+                
+                new_image = StayImage.objects.create(
+                    image_url = image_url,
+                    stay_id   = new_stay.id
+                )
+
+                with transaction.atomic():
+                    user.save()
+                    new_stay.save()
+                    new_image.save()
+            
+            bulk_stay_service   = [StayService.objects.create(stay_id = new_stay.id , service_id = service_id) for service_id in request.POST.getlist('services')]
+            StayService.objects.bulk_create(bulk_stay_service)
+        
+            bulk_stay_amenity   = [StayAmenity.objects.create(stay_id = new_stay.id, amenity_id = amenity_id) for amenity_id in request.POST.getlist('amenities')]
+            StayAmenity.objects.bulk_create(bulk_stay_amenity)
+            
+            bulk_stay_highlight = [StayHighlight.objects.create(stay_id = new_stay.id, highlight_id =highlight_id) for highlight_id in request.POST.getlist('highlights')]
+            StayHighlight.objects.bulk_create(bulk_stay_highlight)
+
+
+            return JsonResponse({'message' : 'SUCCESS'} , status = 200)
+        except KeyError:
+            return JsonResponse({'message' : 'KEY_ERROR'} , status = 402)
