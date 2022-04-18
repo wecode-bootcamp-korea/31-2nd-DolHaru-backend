@@ -310,7 +310,7 @@ class HostingViewTest(TestCase):
             content = b'file_content',
             content_type= 'image/jpg'
         )
-        headers = {}
+        headers = {'Authorization': test_token, 'content-type' : 'multipart/form-data'}
         body = {'user_id'       : 1 ,
                 'title'         : '테스트호텔',
                 'price'         : '110000.00',
@@ -330,4 +330,9 @@ class HostingViewTest(TestCase):
                 'highlights'    : 1,
                 'image'         : test_image1,
                 'image'         : test_image2 
-                } 
+                }
+        
+        response = client.post('/postings', body, **headers)
+        
+        self.assertEqual(response.json(), {'message' : 'SUCCESS'})
+        self.assertEqual(response.status_code, 200)
