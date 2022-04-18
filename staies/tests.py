@@ -1,10 +1,14 @@
 import jwt
 import json
+import mock
 
-from django.test    import TestCase , Client
-from django.conf    import settings
-from staies.models  import *
-from users.models   import User
+from unittest.mock                  import patch , MagicMock
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.files              import File
+from django.test                    import TestCase , Client
+from django.conf                    import settings
+from staies.models                  import *
+from users.models                   import User
 
 client = Client()
 
@@ -182,22 +186,21 @@ class StayDetailPageTest(TestCase):
 
 class HostingViewTest(TestCase):
     def setUp(self):
-        test_user = User.objects.create(
+        User.objects.create(
             id          = 1,
             kakao_id    = 1,
             is_host     = False,
             is_adult    = True,
             email       = 'plz8282@success.com',
-            nick_name   = 'TestBoy',
+            nick_name   = 'successboy',
             birth_date  = '2000-01-01'
         )
-        self.token = jwt.encode({'user_id' : User.objects.get(id = test_user.id)}, settings.SECRET_KEY, algorithm = settings.ALGORITHM)
-
+        
         StayType.objects.create(
             id              = 1,
             name            = '호텔'
         )
-
+        
         Service.objects.create(
             id              = 1,
             name            = '조식'
@@ -232,9 +235,58 @@ class HostingViewTest(TestCase):
             id              = 1,
             name            = '스타일리쉬'
         )
-
+        
+        StayService.objects.create(
+            id              = 1,
+            service_id      = 1,
+            stay_id         = 1,
+        )
+        
+        StayService.objects.create(
+            id              = 2,
+            service_id      = 2,
+            stay_id         = 1,
+        )
+        
+        StayService.objects.create(
+            id              = 3,
+            service_id      = 3,
+            stay_id         = 1,
+        )
+        
+        StayAmenity.objects.create(
+            id              = 1,
+            amenity_id      = 1,
+            stay_id         = 1,
+        )
+        
+        StayAmenity.objects.create(
+            id              = 2,
+            amenity_id      = 2,
+            stay_id         = 1,
+        )
+        
+        StayAmenity.objects.create(
+            id              = 3,
+            amenity_id      = 3,
+            stay_id         = 1,
+        )
+        
+        StayHighlight.objects.create(
+            id              = 1,
+            stay_id         = 1,
+            highlight_id    = 1,
+        )
+        
+        StayImage.objects.create(
+            id              = 1,
+            stay_id         = 1,
+            image_url       = 'happy.url'
+        )
+        
     def tearDown(self):
         User.objects.all().delete()
+        Stay.objects.all().delete()
         StayType.objects.all().delete()
         StayImage.objects.all().delete()
         Service.objects.all().delete()
@@ -244,27 +296,38 @@ class HostingViewTest(TestCase):
         Highlight.objects.all().delete()
         StayHighlight.objects.all().delete()
 
-    def test_hosting_view_success(self):
-        test_image1 = SimpleUpload 
-        test_data = {
-            "title"         : "테스트 호텔",
-            "price"         : "200000.00",
-            "bed"           : 2,
-            "bedroom"       : 2,
-            "bethroom"      : 2,
-            "guest_adult"   : 2,
-            "guest_kid"     : 2,
-            "guest_pet"     : 2,
-            "stay_type_id"  : 1,
-            "description"   : "테스트를 위한 호텔",
-            "address"       : "테스트 주소",
-            "latitude"      : "10.0000000000123",
-            "longitude"     : "10.0000000000123"
-            "image"         : 
-        }
-
-        header = {"Authorization" : self.token}
-        response=client.post('/host',json.dumps(test_data), **header, content_type='application/json')
+    def hosting_success(self):
+        test_token = jwt.encode({'id' : 1}, settings.SECRET_KEY, settings.ALGORITHM)
         
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(),{'message': 'SUCCESS'})
+        test_image1 = SimpleUploadedFile(
+            name    = 'test1.jpg',
+            content = b'file_content',
+            content_type= 'image/jpg'
+        )
+
+        test_image2 = SimpleUploadedFile(
+            name    = 'test2.jpg',
+            content = b'file_content',
+            content_type= 'image/jpg'
+        )
+        headers = {}
+        body = {'user_id'       : 1 ,
+                'title'         : '테스트호텔',
+                'price'         : '110000.00',
+                'bed'           : 2,
+                'bedroom'       : 2, 
+                'bathroom'      : 2,
+                'guest_adult'   : 2, 
+                'guest_kid'     : 2, 
+                'guest_pet'     :  2, 
+                'stay_type_id'  : 1, 
+                'description'   : '세상에사 가장 따듯한 호텔',
+                'address'       :  '테스트 나라',
+                'latitude'      : 11.0000011111222,
+                'longitude'     : 11.0000011111222,
+                'services'      : [1, 2, 3],
+                'amenties'      : [1, 2, 3],
+                'highlights'    : 1,
+                'image'         : test_image1,
+                'image'         : test_image2 
+                } 
