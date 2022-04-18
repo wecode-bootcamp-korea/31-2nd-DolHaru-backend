@@ -37,3 +37,60 @@ class StayDetailView(View):
             return JsonResponse({'result' : result} , status = 200)
         except Stay.DoesNotExist:
             return JsonResponse({'message' : 'STAY_DOES_NOT_EXIST'} , status = 404)
+
+class HostingView(View):
+    s3_client = boto3.client(
+                's3',
+                aws_access_key_id = settings.AWS_ACCESS_KEY_ID , 
+                aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    )
+    @author
+    def post(self, request):
+        try:
+            user = request.user
+            images = request.FILES.getlist('image')
+            User.objects.get(id=user.id).update(is_host=True)
+
+            new_stay = Stay.objects.create(
+                user_id         = user.id,
+                title           = request.POST['title'],
+                price           = request.POST['price'],
+                bed             = request.POST['bed'],
+                bedroom         = request.POST['bedRoom'],
+                bathroom        = request.POST['bathRoom'],
+                guest_adult     = request.POST['maxAdult'],
+                guest_kid       = request.POST['maxKid'],
+                guest_pet       = request.POST['maxPet'],
+                stay_type_id    = request.POST['stayTypeID'],
+                description     = request.POST['description'],
+                address         = request.POST['address'],
+                latitude        = request.POST['latitude'],
+                longitude       = request.POST['longitude']
+            )
+
+            if len(images) < 2:
+                return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+
+            for image in images:
+                dolharu_uuid = str(uuid.uuid4())
+                self.s3_client.upload_fileobj(
+                    image,
+                    "dolharu", 
+                    f'dolharu_images/{dolharu_uuid}',        
+                )
+                image_url = "https://dolharu.s3.ap-northeast-2.amazonaws.com/dolharu_images/" + dolharu_uuid
+                
+                StayImage.objects.create(
+                    image_url = image_url,
+                    stay_id   = new_stay.id
+                )
+            
+            [StayService.objects.create(stay_id = new_stay.id , service_id = service_id) for service_id in request.POST.getlist('services')]
+            
+            [StayAmenity.objects.create(stay_id = new_stay.id, amenity_id = amenity_id) for amenity_id in request.POST.getlist('amenities')]
+            
+            [StayHighlight.objects.create(stay_id = new_stay.id, highlight_id =highlight_id) for highlight_id in request.POST.getlist('highlights')]
+            
+            return JsonResponse({'message' : 'SUCCESS'} , status = 200)
+        except KeyError:
+            return JsonResponse({'message' : 'KEY_ERROR'} , status = 402)
