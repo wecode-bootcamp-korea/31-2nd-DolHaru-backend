@@ -14,6 +14,7 @@ class StayDetailView(View):
             highlights  = Highlight.objects.filter(stayhighlight__stay_id = stay_id)
             
             result = {
+                'stayHost'      : stay.user.nick_name,
                 'stayId'        : stay.id,
                 'title'         : stay.title,
                 'price'         : stay.price,
