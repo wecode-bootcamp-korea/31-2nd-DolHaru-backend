@@ -53,7 +53,6 @@ class HostingView(View):
     def post(self, request):
         try:
             user = request.user
-            user.is_host=True
             
             images = request.FILES.getlist('image')
 
@@ -74,37 +73,34 @@ class HostingView(View):
                 longitude       = request.POST['longitude']
             )
 
-            if len(images) < 2:
-                return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+            with transaction.atomic():
+                user.is_host=True
 
-            for image in images:
-                dolharu_uuid = str(uuid.uuid4())
-                self.s3_client.upload_fileobj(
-                    image,
-                    "dolharu", 
-                    f'dolharu_images/{dolharu_uuid}',        
-                )
-                image_url = "https://dolharu.s3.ap-northeast-2.amazonaws.com/dolharu_images/" + dolharu_uuid
+                if len(images) < 2:
+                    return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+
+                for image in images:
+                    dolharu_uuid = str(uuid.uuid4())
+                    self.s3_client.upload_fileobj(
+                        image,
+                        "dolharu", 
+                        f'dolharu_images/{dolharu_uuid}',        
+                    )
+                    image_url = "https://dolharu.s3.ap-northeast-2.amazonaws.com/dolharu_images/" + dolharu_uuid
+                    
+                    new_image = StayImage.objects.create(
+                        image_url = image_url,
+                        stay_id   = new_stay.id
+                    )
+
+#                stay_list = [Stay(name = "abc") for name in names ]
+#                StayService.objects.bulk_create(stay_list)
+            
+                bulk_stay_service   = [StayService.objects.create(stay_id = new_stay.id , service_id = service_id) for service_id in request.POST.getlist('services')]
+            
+                bulk_stay_amenity   = [StayAmenity.objects.create(stay_id = new_stay.id, amenity_id = amenity_id) for amenity_id in request.POST.getlist('amenities')]
                 
-                new_image = StayImage.objects.create(
-                    image_url = image_url,
-                    stay_id   = new_stay.id
-                )
-
-                with transaction.atomic():
-                    user.save()
-                    new_stay.save()
-                    new_image.save()
-            
-            bulk_stay_service   = [StayService.objects.create(stay_id = new_stay.id , service_id = service_id) for service_id in request.POST.getlist('services')]
-            StayService.objects.bulk_create(bulk_stay_service)
-        
-            bulk_stay_amenity   = [StayAmenity.objects.create(stay_id = new_stay.id, amenity_id = amenity_id) for amenity_id in request.POST.getlist('amenities')]
-            StayAmenity.objects.bulk_create(bulk_stay_amenity)
-            
-            bulk_stay_highlight = [StayHighlight.objects.create(stay_id = new_stay.id, highlight_id =highlight_id) for highlight_id in request.POST.getlist('highlights')]
-            StayHighlight.objects.bulk_create(bulk_stay_highlight)
-
+                bulk_stay_highlight = [StayHighlight.objects.create(stay_id = new_stay.id, highlight_id =highlight_id) for highlight_id in request.POST.getlist('highlights')]
 
             return JsonResponse({'message' : 'SUCCESS'} , status = 200)
         except KeyError:
