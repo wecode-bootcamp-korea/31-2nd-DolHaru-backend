@@ -7,8 +7,11 @@ from datetime     import datetime, timedelta
 
 from users.models import User
 
-class KakaoClient(View):
-    def request_access_token(self, auth_code):
+class KakaoClient:
+    def __init__(self):
+        kakao_url = "https://kapi.kakao.com"
+
+    def get_access_token(self, auth_code):
         auth_code_url = "https://kauth.kakao.com/oauth/token"
         data = {
             "grant_type": "authorization_code",
@@ -17,10 +20,10 @@ class KakaoClient(View):
         }
         token_data = requests.post(auth_code_url , data = data , timeout = 2)
 
-        return token_data
+        return token_data.json()
         
-    def request_user_data(self, access_token):
-        token_url = "https://kapi.kakao.com/v2/user/me"
+    def get_user_information(self, access_token):
+        token_url = 
         user_data = requests.post(token_url, headers = {"Authorization" : f"Bearer {access_token}"} , timeout = 2)
 
         return user_data
@@ -35,7 +38,7 @@ class KakaoSignInView(View):
         if token_data.status_code == 400:
             return JsonResponse({'message' : 'AUTH_CODE_INVALID_ERROR'} , status = 400)
         
-        access_token = token_data.json()['access_token']
+        access_token = token_data['access_token']
         user_data    = client.request_user_data(access_token)
         
         if user_data.status_code == 401:

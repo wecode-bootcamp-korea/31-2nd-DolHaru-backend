@@ -10,12 +10,13 @@ from users.views import KakaoClient
 client = Client()
 class KakaoLoginTest(TestCase):
     @patch.object(KakaoClient, "request_access_token")
+#    @patch('users.views.requests')
     def test_kakao_auth_code_invalid(self, mocked_token):
-        class MockedToken:
-            def json(self):
-                return {"no_access_token" : "no_access_token"}
+#        class MockedToken:
+#            def json(self):
+#                return {"no_access_token" : "no_access_token"}
         
-        mocked_token.return_value = MockedToken().json()
+        mocked_token.return_value = {"access_token" : "no_access_token"}
 
         response = client.post('/users/signin')
 
@@ -35,8 +36,11 @@ class KakaoLoginTest(TestCase):
         self.assertEqual(response.status_code,400)
         self.assertEqual(response.json(), {'message' : 'KEY_ERROR'})
 
-    @patch.object(KakaoClient, "request_user_data")
-    @patch.object(KakaoClient, "request_access_token")
+
+#    @patch.object(KakaoClient, "request_user_data")
+#    @patch.object(KakaoClient, "request_access_token")
+    @patch("users.views.KakaoClient.request_user_data")
+    @patch("users.views.KakaoClient.request_access_token")
     def test_kakao_signin_new_user_success(self, mocked_token, mocked_user_data):
         class MockedToken:
             def json(self):
