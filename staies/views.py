@@ -3,7 +3,7 @@ import uuid , boto3
 
 from django.http    import JsonResponse
 from django.views   import View
-from requests import post
+
 
 from staies.models  import *
 from users.models   import *
@@ -44,7 +44,6 @@ class StayDetailView(View):
             return JsonResponse({'message' : 'STAY_DOES_NOT_EXIST'} , status = 404)
         
 class HostingView(View):
-    
     s3_client = boto3.client(
                 's3',
                 aws_access_key_id = settings.AWS_ACCESS_KEY_ID , 
