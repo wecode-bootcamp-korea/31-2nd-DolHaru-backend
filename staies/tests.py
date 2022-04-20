@@ -71,8 +71,8 @@
 #             stay_type_id    = 1,
 #             description     = '모두가 행복해지는 숙소',
 #             address         = '제주도 어딘가',
-#             latitude        = 11.0000001,
-#             longitude       = 11.0000001,
+#             latitude        = 11.0000011111222,
+#             longitude       = 11.0000011111222,
 #         )
         
 #         StayService.objects.create(

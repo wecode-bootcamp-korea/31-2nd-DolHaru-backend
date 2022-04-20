@@ -65,4 +65,4 @@ class KakaoLoginTest(TestCase):
         payload  = jwt.decode(response.json()['token'], settings.SECRET_KEY, algorithms=settings.ALGORITHM)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(payload['user_id'],1)
+        self.assertEqual(payload['user_id'],2)
