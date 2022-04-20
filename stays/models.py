@@ -23,7 +23,7 @@ class Stay(models.Model):
     highlight   = models.ManyToManyField('Highlight', through = 'StayHighlight')
     
     class Meta:
-        db_table = 'staies'
+        db_table = 'stays'
     
     
 class StayImage(models.Model):
