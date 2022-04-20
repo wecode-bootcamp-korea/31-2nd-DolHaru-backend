@@ -71,8 +71,8 @@ class StayDetailPageTest(TestCase):
             stay_type_id    = 1,
             description     = '모두가 행복해지는 숙소',
             address         = '제주도 어딘가',
-            latitude        = 11.0000001,
-            longitude       = 11.0000001,
+            latitude        = 11.0000011111222,
+            longitude       = 11.0000011111222,
         )
         
         StayService.objects.create(
@@ -142,6 +142,7 @@ class StayDetailPageTest(TestCase):
         self.assertEqual(respone.json(), {"result": {
         "stayId": 1,
         "title": "행복여행 제주도 훈이네",
+        "hostName":"successboy",
         "price": "80000.00",
         "description": "모두가 행복해지는 숙소",
         "placeImages": [
