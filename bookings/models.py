@@ -8,7 +8,7 @@ class Booking(models.Model):
     pet         = models.IntegerField(default=0)
     status      = models.ForeignKey('Status', on_delete=models.CASCADE)
     user        = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    stay        = models.ForeignKey('staies.Stay', on_delete=models.CASCADE)
+    stay        = models.ForeignKey('stays.Stay', on_delete=models.CASCADE)
     
     class Meta:
         db_table = 'bookings'

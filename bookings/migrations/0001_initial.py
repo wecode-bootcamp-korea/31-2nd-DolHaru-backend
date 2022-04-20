@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('staies', '0001_initial'),
+        ('stays', '0001_initial'),
         ('users', '0001_initial'),
     ]
 
@@ -31,7 +31,7 @@ class Migration(migrations.Migration):
                 ('children', models.IntegerField(default=0)),
                 ('pet', models.IntegerField(default=0)),
                 ('status', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bookings.status')),
-                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.stay')),
+                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.stay')),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='users.user')),
             ],
         ),

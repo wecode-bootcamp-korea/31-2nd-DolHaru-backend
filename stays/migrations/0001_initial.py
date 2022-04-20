@@ -62,7 +62,7 @@ class Migration(migrations.Migration):
                 ('updatad_at', models.DateTimeField(auto_now=True)),
             ],
             options={
-                'db_table': 'staies',
+                'db_table': 'stays',
             },
         ),
         migrations.CreateModel(
@@ -79,8 +79,8 @@ class Migration(migrations.Migration):
             name='StayService',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.service')),
-                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.stay')),
+                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.service')),
+                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.stay')),
             ],
             options={
                 'db_table': 'stay_services',
@@ -91,7 +91,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('image_url', models.CharField(max_length=4000)),
-                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.stay')),
+                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.stay')),
             ],
             options={
                 'db_table': 'stay_images',
@@ -101,8 +101,8 @@ class Migration(migrations.Migration):
             name='StayHighlight',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('highlight', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.highlight')),
-                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.stay')),
+                ('highlight', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.highlight')),
+                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.stay')),
             ],
             options={
                 'db_table': 'stay_highlights',
@@ -112,8 +112,8 @@ class Migration(migrations.Migration):
             name='StayAmenity',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amenity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.amenity')),
-                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.stay')),
+                ('amenity', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.amenity')),
+                ('stay', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.stay')),
             ],
             options={
                 'db_table': 'stay_amenities',
@@ -122,22 +122,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='stay',
             name='amenities',
-            field=models.ManyToManyField(through='staies.StayAmenity', to='staies.amenity'),
+            field=models.ManyToManyField(through='stays.StayAmenity', to='stays.amenity'),
         ),
         migrations.AddField(
             model_name='stay',
             name='highlight',
-            field=models.ManyToManyField(through='staies.StayHighlight', to='staies.highlight'),
+            field=models.ManyToManyField(through='stays.StayHighlight', to='stays.highlight'),
         ),
         migrations.AddField(
             model_name='stay',
             name='services',
-            field=models.ManyToManyField(through='staies.StayService', to='staies.service'),
+            field=models.ManyToManyField(through='stays.StayService', to='stays.service'),
         ),
         migrations.AddField(
             model_name='stay',
             name='stay_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='staies.staytype'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='stays.staytype'),
         ),
         migrations.AddField(
             model_name='stay',
