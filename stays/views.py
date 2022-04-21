@@ -1,3 +1,4 @@
+import re
 import uuid , boto3
 
 
@@ -114,9 +115,11 @@ class HostingView(View):
             user   = request.user
             images = request.FILES.getlist('image')
             data   = request.POST
-
+            
             if len(images) < 2:
                     return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+
+            print(data)
 
             with transaction.atomic():   
                 new_stay = Stay.objects.create(
@@ -124,11 +127,11 @@ class HostingView(View):
                     title           = data['title'],
                     price           = data['price'],
                     bed             = data['bed'],
-                    bedroom         = data['bedRoom'],
-                    bathroom        = data['bathRoom'],
-                    guest_adult     = data['maxAdult'],
-                    guest_kid       = data['maxKid'],
-                    guest_pet       = data['maxPet'],
+                    bedroom         = data['bedroom'],
+                    bathroom        = data['bathroom'],
+                    guest_adult     = data.get('maxAdult', 0),
+                    guest_kid       = data.get('maxKid', 0),
+                    guest_pet       = data.get('maxPet', 0),
                     stay_type_id    = data['stayTypeID'],
                     description     = data['description'],
                     address         = data['address'],
