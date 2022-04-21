@@ -382,3 +382,16 @@ zsdoc/data
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm,visualstudiocode,vim,macos,linux,zsh
 
 my_settings.py
+amenity.csv
+booking.csv
+highlight.csv
+service.csv
+status.csv
+db_uploders.py
+stay_type.csv
+stayamenity.csv
+stayhighlight.csv
+stayimage.csv
+stays.csv
+stayservice.csv
+user.csv
