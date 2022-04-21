@@ -1,7 +1,13 @@
-from django.http      import JsonResponse
-from django.views     import View
+import uuid , boto3
 
-from stays.models  import *
+
+from django.http    import JsonResponse
+from django.views   import View
+from django.db      import transaction
+
+from django.conf    import settings
+from cores.utils    import author
+from stays.models   import *
 from users.models   import *
 
 class StayListView(View):
@@ -76,11 +82,75 @@ class StayDetailView(View):
                 'address'       : stay.address,
                 'latitude'      : stay.latitude,
                 'longitude'     : stay.longitude,
-                'services'      : [ service.name for service in stay.services.all()],
-                'amenities'     : [ amenity.name for amenity in stay.amenities.all()],
-                'highlights'    : [ highlight.name for highlight in stay.highlight.all()]
+                'services'      : [service.name for service in stay.services.all()],
+                'amenities'     : [amenity.name for amenity in stay.amenities.all()],
+                'highlights'    : [highlight.name for highlight in stay.highlight.all()]
             }
             
             return JsonResponse({'result' : result} , status = 200)
         except Stay.DoesNotExist:
             return JsonResponse({'message' : 'STAY_DOES_NOT_EXIST'} , status = 404)
+
+class HostingView(View):
+    s3_client = boto3.client(
+    's3',
+    aws_access_key_id = settings.AWS_ACCESS_KEY_ID , 
+    aws_secret_access_key = settings.AWS_SECRET_ACCESS_KEY
+    )
+    def image_upload(self, image):
+        dolharu_uuid = str(uuid.uuid4())
+        self.s3_client.upload_fileobj(
+            image,
+            "dolharu", 
+            f'dolharu_images/{dolharu_uuid}'
+        )
+
+        self.image_uuid = dolharu_uuid
+        return self.image_uuid
+
+    @author
+    def post(self, request):
+        try:
+            user   = request.user
+            images = request.FILES.getlist('image')
+            data   = request.POST
+
+            if len(images) < 2:
+                    return JsonResponse({"message" : "2장 이상의 이미지가 필요합니다."}, status=400)
+
+            with transaction.atomic():   
+                new_stay = Stay.objects.create(
+                    user_id         = user.id,
+                    title           = data['title'],
+                    price           = data['price'],
+                    bed             = data['bed'],
+                    bedroom         = data['bedRoom'],
+                    bathroom        = data['bathRoom'],
+                    guest_adult     = data['maxAdult'],
+                    guest_kid       = data['maxKid'],
+                    guest_pet       = data['maxPet'],
+                    stay_type_id    = data['stayTypeID'],
+                    description     = data['description'],
+                    address         = data['address'],
+                    latitude        = data['latitude'],
+                    longitude       = data['longitude']
+                )    
+                
+                user.is_host=True
+                
+                stay_sevice_list    = [StayService(stay_id = new_stay.id, service_id = service_id) for service_id in data.getlist('services')]
+                StayService.objects.bulk_create(stay_sevice_list)
+                
+                stay_amenity_list   = [StayAmenity(stay_id = new_stay.id, amenity_id = amenity_id) for amenity_id in data.getlist('amenities')]
+                StayAmenity.objects.bulk_create(stay_amenity_list)
+                    
+                stay_highlight_list = [StayHighlight(stay_id = new_stay.id, highlight_id =highlight_id) for highlight_id in data.getlist('highlights')]
+                StayHighlight.objects.bulk_create(stay_highlight_list)
+                
+                for image in images:
+                    image_url   = self.image_upload(image)
+                    StayImage.objects.create(image_url = image_url, stay_id = new_stay.id)
+
+            return JsonResponse({'message' : 'SUCCESS'} , status = 200)
+        except KeyError:
+            return JsonResponse({'message' : 'KEY_ERROR'} , status = 400)
